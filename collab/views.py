@@ -167,8 +167,14 @@ def collaborateur_detail(request, collaborateurs_id):
     expeSingificatives.append(collab.expSignificative3)
     expeSingificatives.append(collab.expSignificative4)
     expeSingificatives.append(collab.expSignificative5)
+    formations=[]
+    for form in collab.formation.all():
+        annee=form.get_year()
+        diplome=form.formation.diplome
+        ecole=form.formation.ecole
+        formations.append(str(annee)+" - "+diplome+" - "+ecole)
     template = loader.get_template('collab/detail_consultant2.html')
-    context={'collab':collab, 'mission_du_collab':mission_du_collab,'expeSingificatives':expeSingificatives}
+    context={'collab':collab, 'mission_du_collab':mission_du_collab,'expeSingificatives':expeSingificatives,'formations':formations}
     return HttpResponse(template.render(context, request))
 #Ajout d'un consultant
 class collaborateursCreateView(CreateView):

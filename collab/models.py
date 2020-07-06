@@ -122,6 +122,8 @@ class obtentionFormation(models.Model):
     formation = models.ForeignKey(formation, on_delete=models.SET_NULL, null=True)
     def __str__(self):
         return str('%s %s' %(self.dateObtention, self.formation))
+    def get_year(self):
+        return self.dateObtention.year
 
 #Niveaux d'interventions
 class niveauIntervention(models.Model):

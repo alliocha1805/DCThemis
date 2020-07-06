@@ -15,9 +15,9 @@
                 {% with id_collab=collab.pk %}
                 {% with nbAnneeExperience=id_collab|calcul_annee_exp %}
                 {% if nbAnneeExperience == '1' %}
-                <h1 class="text-center">{{collab.titreCollaborateur}} - {{nbAnneeExperience}} an d'expérience</h1>
+                <h1 class="text-center">{{collab.titreCollaborateur}} - {{nbAnneeExperience}} an d'expérience <a class="btn btn-primary" role="button" href="/admin/collab/collaborateurs/{{collab.pk}}/change"> <i class="glyphicon glyphicon-pencil"></i></a></h1>
                 {% else %}
-                <h1 class="text-center">{{collab.titreCollaborateur}} - {{nbAnneeExperience}} ans d'expérience</h1>
+                <h1 class="text-center">{{collab.titreCollaborateur}} - {{nbAnneeExperience}} ans d'expérience <a class="btn btn-primary" role="button" href="/admin/collab/collaborateurs/{{collab.pk}}/change"> <i class="glyphicon glyphicon-pencil"></i></a></h1>
                 {% endif %}
                 <p class="lead text-center">{{collab.texteIntroductifCv | safe}}</p>
                 {% endwith %}
@@ -85,7 +85,7 @@
                         <h3 class="panel-title">Formation </h3></div>
                         <div class="panel-body">
                             <ul>
-                                {% for form in collab.formation.all %}
+                                {% for form in formations %}
                                 <li>{{form}}</li>
                                 {% endfor %}
                             </ul>
