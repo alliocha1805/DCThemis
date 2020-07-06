@@ -435,8 +435,25 @@ def page_cv_word(request, collaborateurs_id):
     #recup des outils
     OutilsConsult = collab.outilsCollaborateur.all()
     outils=[]
+    #on groupe les résultat dans un dictionnaire {famille:[outil1,outil2],famille2:[outil1,outil2]}
+    groupementOutil={}
     for outil in OutilsConsult:
-        outils.append(outil.nomOutil)
+        famille=outil.famille
+        nom=outil.nomOutil
+        #on verifie si la famille outil est deja dans le dictionnaire
+        if famille in groupementOutil:
+            #on ajoute la valeur a la liste d'outils
+            liste=groupementOutil.get(famille)
+            liste= liste + ", " + nom
+            groupementOutil[famille]=liste
+        else:
+            groupementOutil[famille]=nom
+    for key in groupementOutil:
+        outils.append(str(key)+" : "+groupementOutil.get(key))
+    #Ancienne fonction basique je garde pour le moment
+    #for outil in OutilsConsult:
+    #    outils.append(outil.nomOutil)
+    
     #recup des langues
     LanguesConsult = collab.langues.all()
     langues=[]
