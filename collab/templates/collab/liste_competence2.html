@@ -21,7 +21,7 @@
                             <tr>
                                 <td>{{compe.famille}} </td>
                                 <td>{{compe.nomCompetence}} </td>
-                                <td>{{truc|nb_consultant_compe}} </td>
+                                <td><a href="{% url 'liste_consultant_competence' competences_id=truc%} ">{{truc|nb_consultant_compe}}</a></td>
                             </tr>
                             {% endwith %}
                             {% endfor %}

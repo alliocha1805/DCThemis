@@ -23,7 +23,7 @@
                             <tr>
                                 <td>{{cli.nomClient}} </td>
                                 <td class="hidden-xs hidden-sm">{{truc|recup_client_secteur_propre }} </td>
-                                <td>{{truc|recup_mission}} </td>
+                                <td><a href="{% url 'liste_consultant_client' client_id=truc%}">{{truc|recup_mission}}</a></td>
                                 <td>{{truc|recup_mission_en_cours}} </td>
                                <td class="hidden-xs hidden-sm">{{truc|statut_client}}</td>
                             </tr>

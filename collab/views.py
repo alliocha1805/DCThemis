@@ -179,7 +179,7 @@ def collaborateur_detail(request, collaborateurs_id):
 #Ajout d'un consultant
 class collaborateursCreateView(CreateView):
     model = collaborateurs
-    fields = ('nomCollaborateur', 'prenomCollaborateur','titreCollaborateur','texteIntroductifCv','listeCompetencesCles','formation','parcours','methodologie','langues','outilsCollaborateur','estEnIntercontrat')
+    fields = ('nomCollaborateur', 'prenomCollaborateur','trigramme','titreCollaborateur','dateDeNaissance','texteIntroductifCv','dateDebutExpPro','codePostal','telephone','listeCompetencesCles','formation','parcours','methodologie','langues','outilsCollaborateur','estEnIntercontrat')
     success_url = 'succes/'
 def reussite_ajout_collaborateurs(request):
     template = loader.get_template('collab/reussite_ajout_collaborateurs2.html')
@@ -202,7 +202,20 @@ class clientCreateView(LoginRequiredMixin, CreateView):
 def reussite_ajout_client(request):
     template = loader.get_template('collab/reussite_ajout_client2.html')
     context={}
-    return HttpResponse(template.render(context, request))    
+    return HttpResponse(template.render(context, request))  
+
+# Liste consultant Par Client
+def liste_consultant_client(request,client_id):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    expe_list= experiences.objects.filter(client=client_id)
+    collab_list=[]
+    for elt in expe_list:
+        collab_id=elt.collaborateurMission.pk
+        collab=get_object_or_404(collaborateurs, pk=collab_id)
+        collab_list.append(collab)
+    context={'collabs':collab_list}
+    return HttpResponse(template.render(context, request))
+
 #Liste compétences PAGINEE EN FRONT
 def liste_competence(request):
     template = loader.get_template('collab/liste_competence2.html')
@@ -220,6 +233,12 @@ class competencesCreateView(LoginRequiredMixin, CreateView):
 def reussite_ajout_competence(request):
     template = loader.get_template('collab/reussite_ajout_compe2.html')
     context={}
+    return HttpResponse(template.render(context, request))
+# Liste consultant Par compétence
+def liste_consultant_competence(request,competences_id):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.filter(listeCompetencesCles=competences_id)
+    context={'collabs':collab_list}
     return HttpResponse(template.render(context, request))
 
 #Liste outil REELLEMENT PAGINEE
@@ -253,7 +272,12 @@ def reussite_ajout_outil(request):
     template = loader.get_template('collab/reussite_ajout_outil2.html')
     context={}
     return HttpResponse(template.render(context, request))
-
+# Liste consultant Par Outil
+def liste_consultant_outil(request,outil_id):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.filter(outilsCollaborateur=outil_id)
+    context={'collabs':collab_list}
+    return HttpResponse(template.render(context, request))
 
 #Page CV
 def page_cv_html(request, collaborateurs_id):
@@ -474,7 +498,10 @@ def page_cv_word(request, collaborateurs_id):
     FormationConsult = collab.formation.all()
     formations=[]
     for forma in FormationConsult:
-        formations.append(forma.formation)
+        annee=forma.get_year()
+        diplome=forma.formation.diplome
+        ecole=forma.formation.ecole
+        formations.append(str(annee)+" : "+diplome+" - "+ecole)
     #recup des missions (il faut tout recup car impossible d'utiliser les templatetags avec du Word)
     missions=[]
     for miss in mission_du_collab:
@@ -489,11 +516,11 @@ def page_cv_word(request, collaborateurs_id):
         if dateFin is None:
             fin = datetime.date.today()
             debut = miss.dateDebut
-            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month)
+            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month)+ 1
         else:
             fin = miss.dateFin
             debut = miss.dateDebut
-            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month)            
+            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month) + 1           
         data["dureeMission"]=dureeMission
         data["contexteMission"]=generateRichText(doc,miss.resumeIntervention, "DC_Intervention_Contexte")
         data["descriptif"]=generateRichText(doc, miss.descriptifMission, "DC_Intervention_Desc")

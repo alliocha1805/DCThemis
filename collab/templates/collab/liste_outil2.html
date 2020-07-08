@@ -21,7 +21,7 @@
                             <tr>
                                 <td>{{tool.famille}} </td>
                                 <td>{{tool.nomOutil}} </td>
-                                <td>{{truc|nb_consultant_outil}}</td>
+                                <td><a href="{% url 'liste_consultant_outil' outil_id=truc%}">{{truc|nb_consultant_outil}}</a></td>
                             </tr>
                             {% endwith %}
                             {% endfor %}

@@ -3,6 +3,7 @@ from django.forms import ModelForm
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from ckeditor.fields import RichTextField 
+import datetime
 
 #Clients
 class client(models.Model):
@@ -192,6 +193,7 @@ class collaborateurs(models.Model):
     langues = models.ManyToManyField(LanguesParlee, blank=True, help_text='Obligatoire, indiquez le niveau d’anglais')
     outilsCollaborateur = models.ManyToManyField(outils, blank=True, verbose_name='Outils')
     estEnIntercontrat = models.BooleanField(default=False)
+    updated = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.nomCollaborateur + "-" + self.prenomCollaborateur
     def get_absolute_url(self):

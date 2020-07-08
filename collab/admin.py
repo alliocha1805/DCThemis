@@ -29,7 +29,7 @@ class ExpeAdmin(admin.ModelAdmin):
     view_on_site = True
 admin.site.register(experiences, ExpeAdmin)
 class ProjetAdmin(admin.ModelAdmin):
-    search_fields = ['client','nomProjet']
+    search_fields = ['nomProjet']
     list_filter = ('client','nbJourHomme','projetThemis')
     list_display = ('nomProjet','client','nbJourHomme')
 admin.site.register(projet, ProjetAdmin)

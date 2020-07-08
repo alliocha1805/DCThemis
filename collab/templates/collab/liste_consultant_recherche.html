@@ -10,12 +10,17 @@
                     <table class="table table-striped table-bordered" data-toggle="table" data-pagination="true" data-search="true">
                         <thead>
                             <tr class="text-center">
+                                <th class="text-center" data-sortable="true">Trigramme </th>
                                 <th class="text-center" data-sortable="true">Nom </th>
                                 <th class="text-center" data-sortable="true">Prenom </th>
                                 <th class="text-center" data-sortable="true">Titre </th>
-                                <th class="text-center" data-sortable="true">Intercontrat </th>
-                                <th class="hidden-xs hidden-sm text-center">CV </th>
-                                <th class="hidden-xs hidden-sm text-center">Modification </th>
+                                <th class="hidden-xs hidden-sm text-center" data-sortable="true">Manager </th>
+                                <th class="hidden-xs hidden-sm text-center" data-sortable="true">Interne </th>
+                                <th class="hidden-xs hidden-sm text-center" data-sortable="true">Intercontrat </th>
+                                <th class="hidden-xs hidden-sm text-center" data-sortable="true">Actif </th>
+                                <th class="hidden-xs hidden-sm text-center" data-sortable="true">Date dernière MAJ </th>
+                                <th class="text-center">CV </th>
+                                <th class="text-center">Modification </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -23,12 +28,17 @@
                             {% with truc=collab.pk %}
                             {% with "/admin/collab/collaborateurs/"|addstr:collab.pk|addstr:"/change/" as urlModif %}
                             <tr>
+                                <td>{{collab.trigramme}} </td>
                                 <td>{{collab.nomCollaborateur}} </td>
                                 <td>{{collab.prenomCollaborateur}} </td>
                                 <td>{{collab.titreCollaborateur}} </td>
-                                <td>{{truc|statut_consultant}} </td>
-                                <td class="hidden-xs hidden-sm"> <a class="btn btn-info" role="button" href="{% url 'collaborateur_detail' collaborateurs_id=collab.pk %}">AFFICHER </a></td>
-                                <td class="hidden-xs hidden-sm">
+                                <td class="hidden-xs hidden-sm text-center">{% with manager=truc|manager_consultant_propre %} {{manager}} {% endwith %}</td>
+                                <td class="hidden-xs hidden-sm text-center">{% with contrat=truc|statut_contrat %} {{contrat}} {% endwith %}</td>
+                                <td class="hidden-xs hidden-sm text-center">{{truc|statut_consultant}} </td>
+                                <td class="hidden-xs hidden-sm text-center">{% with actif=truc|actif_consultant %} {{actif}} {% endwith %}</td>
+                                <td class="hidden-xs hidden-sm text-center">{{collab.updated}}</td>
+                                <td> <a class="btn btn-info" role="button" href="{% url 'collaborateur_detail' collaborateurs_id=collab.pk %}">AFFICHER </a></td>
+                                <td>
                                     <a class="btn btn-primary" role="button" href={{urlModif}}> <i class="glyphicon glyphicon-pencil"></i></a>
                                 </td>
                             </tr>
