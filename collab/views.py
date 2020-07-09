@@ -502,6 +502,28 @@ def page_cv_word(request, collaborateurs_id):
         diplome=forma.formation.diplome
         ecole=forma.formation.ecole
         formations.append(str(annee)+" : "+diplome+" - "+ecole)
+    #recup des expe significatives
+    expeSignificatives=[]
+    if collab.expSignificative1:
+        expeSignificatives.append(collab.expSignificative1)
+    else:
+        pass
+    if collab.expSignificative2:
+        expeSignificatives.append(collab.expSignificative2)
+    else:
+        pass
+    if collab.expSignificative3:
+        expeSignificatives.append(collab.expSignificative3)
+    else:
+        pass
+    if collab.expSignificative4:
+        expeSignificatives.append(collab.expSignificative4)
+    else:
+        pass
+    if collab.expSignificative5:
+        expeSignificatives.append(collab.expSignificative5)
+    else:
+        pass
     #recup des missions (il faut tout recup car impossible d'utiliser les templatetags avec du Word)
     missions=[]
     for miss in mission_du_collab:
@@ -534,11 +556,7 @@ def page_cv_word(request, collaborateurs_id):
     context["trigramme"]=collab.trigramme
     context["nbAnneeExpe"]=nbAnneeExpe
     context["text_intro"]=texte_introductif
-    context["expeSigni1"]=collab.expSignificative1
-    context["expeSigni2"]=collab.expSignificative2
-    context["expeSigni3"]=collab.expSignificative3
-    context["expeSigni4"]=collab.expSignificative4
-    context["expeSigni5"]=collab.expSignificative5
+    context["expeSignificatives"]=expeSignificatives
     context["competences"]=competences
     context["Interventions"]=interventions
     context["clients"]=clients

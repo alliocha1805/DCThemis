@@ -29,7 +29,7 @@ def actif_consultant(id_collab):
     elif date_depart > datetime.date.today():
         actif="ACTIF"
     else:
-        actif="INACTIF" 
+        actif="NON" 
     return actif
 
 #Recup manager propre d'un consultant
