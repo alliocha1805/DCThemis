@@ -9,6 +9,7 @@ import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 import datetime
+import locale
 from xhtml2pdf import pisa 
 import bs4
 from docxtpl import DocxTemplate, RichText, Listing
@@ -434,7 +435,7 @@ def page_cv_word(request, collaborateurs_id):
     nom_sortie = nom + "-"+prenom+"-"+str(today)+".docx"
     titre = collab.titreCollaborateur
     #calcul nb année expe
-    if isinstance(collab.dateDebutExpPro,datetime.datetime):
+    if isinstance(collab.dateDebutExpPro,datetime.date):
         dateExpeDebutAnne = collab.dateDebutExpPro.year
     else:
         dateExpeDebutAnne = datetime.date.today().year	
@@ -526,6 +527,7 @@ def page_cv_word(request, collaborateurs_id):
         pass
     #recup des missions (il faut tout recup car impossible d'utiliser les templatetags avec du Word)
     missions=[]
+    locale.setlocale(locale.LC_ALL, 'fr_FR')
     for miss in mission_du_collab:
         data={}
         data["nomMission"]=miss.nomMission
@@ -533,16 +535,24 @@ def page_cv_word(request, collaborateurs_id):
         data["Domaine"]=miss.client.domaineClient
         data["Service"]=miss.service
         data["dateDebut"]=miss.dateDebut
+        data["dateDebut_mmmm_aaaa"]=miss.dateDebut.strftime("%B %Y")
+        data["dateDebut_mmm-aaaa"]=miss.dateDebut.strftime("%b-%Y")
         #calcul durée
         dateFin=miss.dateFin
         if dateFin is None:
             fin = datetime.date.today()
             debut = miss.dateDebut
             dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month)+ 1
+            data["dateFin"]="Aujourd'hui"
+            data["dateFin_mmmm_aaaa"]="Aujourd'hui"
+            data["dateFin_mmm-aaaa"]="Aujourd'hui"
         else:
             fin = miss.dateFin
             debut = miss.dateDebut
-            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month) + 1           
+            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month) + 1
+            data["dateFin"]=miss.dateFin
+            data["dateFin_mmmm_aaaa"]=miss.dateFin.strftime("%B %Y")
+            data["dateFin_mmm-aaaa"]=miss.dateFin.strftime("%b-%Y")
         data["dureeMission"]=dureeMission
         data["contexteMission"]=generateRichText(doc,miss.resumeIntervention, "DC_Intervention_Contexte")
         data["descriptif"]=generateRichText(doc, miss.descriptifMission, "DC_Intervention_Desc")
