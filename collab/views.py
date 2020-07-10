@@ -15,6 +15,13 @@ import bs4
 from docxtpl import DocxTemplate, RichText, Listing
 import io
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles.finders import find
+import os
+from django.conf import settings
+from django.contrib.staticfiles.utils import get_files
+from django.contrib.staticfiles.storage import StaticFilesStorage
+from .forms import CvTemplateForm
+
 # Homepage
 def index(request):
     template = loader.get_template('collab/index2.html')
@@ -423,10 +430,10 @@ def generateRichText2(doc, raw_html, DC_STYLE):
                                                 
     return(rt)
 #Page CV docx
-def page_cv_word(request, collaborateurs_id):
+def page_cv_word_choix_template(request, collaborateurs_id, template_path):
     collab = get_object_or_404(collaborateurs, pk=collaborateurs_id)
     mission_du_collab = experiences.objects.filter(collaborateurMission=collaborateurs_id).order_by('-dateDebut')
-    fichier_template = staticfiles_storage.path('collab/Thémis-conseil-DC_TEMPLATE.docx')
+    fichier_template = staticfiles_storage.path(template_path)
     doc = DocxTemplate(fichier_template)
     today = datetime.date.today()
     context = {}
@@ -586,6 +593,21 @@ def page_cv_word(request, collaborateurs_id):
     response["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     return response
 
+
+#Vue form choix template CV
+def recup_option_cv(request, collaborateurs_id):
+    if request.method == 'POST':
+        form = CvTemplateForm(request.POST)
+        if form.is_valid():
+           template = form.cleaned_data['template']
+           template_path='collab\\'+template
+           return page_cv_word_choix_template(request, collaborateurs_id,template_path)
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = CvTemplateForm()
+        form.initial['collabid'] = collaborateurs_id
+
+    return render(request, 'collab/choix_option_cv.html', {'form': form})
 #Page liste intervention
 def liste_intervention(request):
     template = loader.get_template('collab/liste_intervention.html')
