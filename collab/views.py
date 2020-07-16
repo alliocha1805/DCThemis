@@ -373,6 +373,7 @@ def generateRichText (doc, html_text, dc_style):
     IsHtmlElement = bool(bs4.BeautifulSoup(html_text, "html.parser").find())
     if bool(bs4.BeautifulSoup(html_text, "html.parser").find()):
         html_text = html_text.replace('\n','')
+        html_text = html_text.replace('\r','')
         html_text = html_text.replace('\t','')
         soup_text = bs4.BeautifulSoup(html_text, "html.parser")
         for soup_element in soup_text.contents:
