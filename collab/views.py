@@ -53,15 +53,26 @@ def index(request):
                     else:
                         statut = "PAS ACTIF"
         return statut
+    def VerifMissionEnCours(idMission):
+        missionaTest=get_object_or_404(experiences, pk=idMission)
+        today = datetime.date.today()
+        dateFinMission = missionaTest.dateFin
+        if not dateFinMission:
+            statut = "ACTIF"
+        elif dateFinMission < today:
+            statut = "ACTIF"
+        else:
+            statut = "INACTIF"
+        return statut
     #calcul du nombre de client actif (a savoir les clients avec une mission en cours a date) A REWORK car expe n'ont plus de client
     def getClientActif():
         client_total=client.objects.all()
         count=0
+        today = datetime.date.today()
         for elt in client_total:
-            projets = projet.objects.filter(client=elt.id)
-            for elt in projets:
-                idProjet = elt.pk
-                statut= verifProjetActif(idProjet)
+            missions = experiences.objects.filter(client=elt.id)
+            for elt in missions:
+                statut = VerifMissionEnCours(elt.pk)
                 if statut == "ACTIF":
                     count+=1
                     break
