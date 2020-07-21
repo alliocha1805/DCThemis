@@ -168,3 +168,11 @@ def calcul_annee_exp(id_collab):
     except:
         nbAnneeExpe="DEFINIR DATE DEBUT EXPE PRO"
     return nbAnneeExpe
+
+#Date dernière modif collab sous forme JJ/MM/AAAA
+@register.filter
+def dateModifPropre(id_collab):
+    collab = get_object_or_404(collaborateurs, pk=id_collab)
+    datePasPropre = collab.updated
+    datePropre = datePasPropre.strftime('%d-%m-%Y')
+    return datePropre

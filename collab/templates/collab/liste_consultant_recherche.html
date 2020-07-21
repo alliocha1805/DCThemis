@@ -36,7 +36,7 @@
                                 <td class="hidden-xs hidden-sm text-center">{% with contrat=truc|statut_contrat %} {{contrat}} {% endwith %}</td>
                                 <td class="hidden-xs hidden-sm text-center">{{truc|statut_consultant}} </td>
                                 <td class="hidden-xs hidden-sm text-center">{% with actif=truc|actif_consultant %} {{actif}} {% endwith %}</td>
-                                <td class="hidden-xs hidden-sm text-center">{{collab.updated}}</td>
+                                <td class="hidden-xs hidden-sm text-center">{{truc|dateModifPropre}}</td>
                                 <td> <a class="btn btn-info" role="button" href="{% url 'collaborateur_detail' collaborateurs_id=collab.pk %}">AFFICHER </a></td>
                                 <td>
                                     <a class="btn btn-primary" role="button" href={{urlModif}}> <i class="glyphicon glyphicon-pencil"></i></a>

@@ -36,6 +36,7 @@ admin.site.register(projet, ProjetAdmin)
 class ClientAdmin(admin.ModelAdmin):
     search_fields = ['nomClient']
     list_filter = ('domaineClient',)
+    list_display = ('nomClient','domaineClient')
 admin.site.register(client,ClientAdmin)
 admin.site.register(BU)
 class gestionManagerialeProjetAdmin(admin.ModelAdmin):
@@ -56,6 +57,9 @@ class FormationAdmin(admin.ModelAdmin):
     list_filter = ('ecole','diplome')
 admin.site.register(formation, FormationAdmin)
 admin.site.register(obtentionFormation)
-admin.site.register(niveauIntervention)
+class NiveauInterventionAdmin(admin.ModelAdmin):
+    search_fields = ['libelle']
+    list_filter = ('libelle',)
+admin.site.register(niveauIntervention, NiveauInterventionAdmin)
 admin.site.register(LanguesParlee)
 admin.site.register(Methodo)

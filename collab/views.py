@@ -21,14 +21,27 @@ from django.conf import settings
 from django.contrib.staticfiles.utils import get_files
 from django.contrib.staticfiles.storage import StaticFilesStorage
 from .forms import CvTemplateForm
-
+#Calcul du nb de consultant actif
+def nbConsultantActif():
+    compteur=0
+    consultants=collaborateurs.objects.all()
+    for elt in consultants:
+        dateDepart=elt.dateSortie
+        if not dateDepart:
+            compteur+=1
+        elif dateDepart > datetime.date.today():
+            compteur+=1
+        else:
+            pass
+    return compteur
 # Homepage
 def index(request):
     template = loader.get_template('collab/index2.html')
-    nbConsultant = collaborateurs.objects.count()
+    nbConsultant = nbConsultantActif()
     nbConsultantInterco = collaborateurs.objects.filter(estEnIntercontrat=True).count()
     nbConsultantEnMission = nbConsultant - nbConsultantInterco
-    txInterco = round((nbConsultantInterco / nbConsultant)*100,2)
+    #txInterco = round((nbConsultantInterco / nbConsultant)*100)
+    txInterco = round((nbConsultantInterco / nbConsultantActif())*100)
     nbCompe = competences.objects.count()
     nbOutils = outils.objects.count()
     nbClient = client.objects.count()
@@ -210,6 +223,51 @@ def liste_client(request):
     template = loader.get_template('collab/liste_client2.html')
     client_list= client.objects.all().order_by('nomClient')
     context={'clients':client_list}
+    return HttpResponse(template.render(context, request))
+#Fonction de verification de mission en cours
+def VerifMissionEnCours(idMission):
+    missionaTest=get_object_or_404(experiences, pk=idMission)
+    today = datetime.date.today()
+    dateFinMission = missionaTest.dateFin
+    if not dateFinMission:
+        statut = "ACTIF"
+    elif dateFinMission < today:
+        statut = "ACTIF"
+    else:
+        statut = "INACTIF"
+    return statut
+#Liste client actif
+def liste_client_actif(request):
+    template = loader.get_template('collab/liste_client2.html')
+    client_list= client.objects.all()
+    clients=[]
+    for elt in client_list:
+        missionsDuClient = experiences.objects.filter(client=elt.id)
+        for mission in missionsDuClient:
+            statut = VerifMissionEnCours(mission.pk)
+            if statut == "ACTIF":
+                clients.append(elt)
+                break
+            else:
+                continue
+    context={'clients':clients}
+    return HttpResponse(template.render(context, request))
+#Liste client inactif
+def liste_client_inactif(request):
+    template = loader.get_template('collab/liste_client2.html')
+    client_list= client.objects.all()
+    clients_actif=[]
+    for elt in client_list:
+        missionsDuClient = experiences.objects.filter(client=elt.id)
+        for mission in missionsDuClient:
+            statut = VerifMissionEnCours(mission.pk)
+            if statut == "ACTIF":
+                clients_actif.append(elt)
+                break
+            else:
+                continue
+    clients = list(set(client_list) - set(clients_actif))
+    context={'clients':clients}
     return HttpResponse(template.render(context, request))
 #Ajout d'un client
 class clientCreateView(LoginRequiredMixin, CreateView):
@@ -582,6 +640,7 @@ def page_cv_word_choix_template(request, collaborateurs_id, template_path):
     context["nom"]=nom
     context["prenom"]=prenom
     context["titre"]=titre
+    context["grade"]=collab.grade
     context["trigramme"]=collab.trigramme
     context["nbAnneeExpe"]=nbAnneeExpe
     context["text_intro"]=texte_introductif
