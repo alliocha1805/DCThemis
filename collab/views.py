@@ -40,8 +40,7 @@ def index(request):
     nbConsultant = nbConsultantActif()
     nbConsultantInterco = collaborateurs.objects.filter(estEnIntercontrat=True).count()
     nbConsultantEnMission = nbConsultant - nbConsultantInterco
-    #txInterco = round((nbConsultantInterco / nbConsultant)*100)
-    txInterco = round((nbConsultantInterco / nbConsultantActif())*100)
+    txInterco = round((nbConsultantInterco / nbConsultantActif())*100,1)
     nbCompe = competences.objects.count()
     nbOutils = outils.objects.count()
     nbClient = client.objects.count()
@@ -94,7 +93,7 @@ def index(request):
         return(count)
     nbClientActif = getClientActif()
     nbClientInactif = nbClient - nbClientActif
-    txClientInactif = round((nbClientInactif / nbClient)*100,2)
+    txClientInactif = round((nbClientInactif / nbClient)*100,1)
     #calcul du nombre de competence moyen par consultant
     def getMoyenneCompetence():
         listeCompe=[]
@@ -112,8 +111,8 @@ def index(request):
             listeOutil.append(nb_outil_calcul)
         moyenne=(sum(listeOutil)/len(listeOutil))
         return(moyenne)
-    moyenneOutil = getMoyenneOutil()
-    moyenneCompetence = getMoyenneCompetence()
+    moyenneOutil = round(getMoyenneOutil(),1)
+    moyenneCompetence = round(getMoyenneCompetence(),1)
     #calcul top 5 des outils - la fonction retourne l'outil en position N du top
     def getTop5Outils():
         listeCollab=collaborateurs.objects.all()
@@ -200,7 +199,7 @@ def collaborateur_detail(request, collaborateurs_id):
     expeSingificatives.append(collab.expSignificative4)
     expeSingificatives.append(collab.expSignificative5)
     formations=[]
-    for form in collab.formation.all():
+    for form in collab.formation.all().order_by('formation__obtentionformation__dateObtention'):
         annee=form.get_year()
         diplome=form.formation.diplome
         ecole=form.formation.ecole
@@ -587,7 +586,7 @@ def page_cv_word_choix_template(request, collaborateurs_id, template_path):
     for methodo in MethodoConsult:
         methodologies.append(methodo.nom)
     #recup des formations
-    FormationConsult = collab.formation.all()
+    FormationConsult = collab.formation.all().order_by('formation__obtentionformation__dateObtention')
     formations=[]
     for forma in FormationConsult:
         annee=forma.get_year()
