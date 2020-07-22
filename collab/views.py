@@ -86,8 +86,8 @@ def index(request):
             if not missions:
                 pass
             else:
-                for elt in missions:
-                    statut = VerifMissionEnCours(elt.pk)
+                for miss in missions:
+                    statut = VerifMissionEnCours(miss.pk)
                     if statut == "ACTIF":
                         count+=1
                         break
