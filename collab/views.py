@@ -585,7 +585,7 @@ def page_cv_word_choix_template(request, collaborateurs_id, template_path):
     methodologies=[]
     for methodo in MethodoConsult:
         methodologies.append(methodo.nom)
-    #recup des formations
+    #recup des formations simple
     FormationConsult = collab.formation.all().order_by('formation__obtentionformation__dateObtention')
     formations=[]
     for forma in FormationConsult:
@@ -593,6 +593,17 @@ def page_cv_word_choix_template(request, collaborateurs_id, template_path):
         diplome=forma.formation.diplome
         ecole=forma.formation.ecole
         formations.append(str(annee)+" : "+diplome+" - "+ecole)
+    #Formation en double boucle
+    formations2=[]
+    for forma in FormationConsult:
+        data={}
+        data["annee"]=forma.get_year()
+        data["diplome"]=forma.formation.diplome
+        data["ecole"]=forma.formation.ecole
+        data["formation"]=(str(data["annee"])+" : "+data["diplome"]+" - "+data["ecole"])
+        formations2.append(data)
+    context["formations2"]=sorted(formations2, key=lambda col: col["annee"])
+    context["formations2_desc"]=sorted(formations2, key=lambda col: col["annee"], reverse=True)
     #recup des expe significatives
     expeSignificatives=[]
     if collab.expSignificative1:
