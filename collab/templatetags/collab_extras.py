@@ -137,7 +137,7 @@ def recup_mission_en_cours(id_client):
 def statut_client(id_client):
     missions = experiences.objects.filter(client=id_client)
     if not missions:
-        statut = "Inactif"
+        statut = "NON"
     else:
         for mission in missions:
             date_fin=mission.dateFin
@@ -148,7 +148,7 @@ def statut_client(id_client):
                 statut = "Actif"
                 break
             else:
-                statut = "Inactif"
+                statut = "NON"
     return statut       
 
 #Ajouter deux string

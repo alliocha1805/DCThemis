@@ -83,13 +83,16 @@ def index(request):
         today = datetime.date.today()
         for elt in client_total:
             missions = experiences.objects.filter(client=elt.id)
-            for elt in missions:
-                statut = VerifMissionEnCours(elt.pk)
-                if statut == "ACTIF":
-                    count+=1
-                    break
-                else:
-                    continue
+            if not missions:
+                pass
+            else:
+                for elt in missions:
+                    statut = VerifMissionEnCours(elt.pk)
+                    if statut == "ACTIF":
+                        count+=1
+                        break
+                    else:
+                        continue
         return(count)
     nbClientActif = getClientActif()
     nbClientInactif = nbClient - nbClientActif
