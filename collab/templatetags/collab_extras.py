@@ -176,3 +176,22 @@ def dateModifPropre(id_collab):
     datePasPropre = collab.updated
     datePropre = datePasPropre.strftime('%d-%m-%Y')
     return datePropre
+
+#Date debut mission propre
+@register.filter
+def dateDebutMissionPropre(id_mission):
+    mission = get_object_or_404(experiences, pk=id_mission)
+    datePasPropre = mission.dateDebut
+    datePropre = datePasPropre.strftime('%d-%m-%Y')
+    return datePropre
+
+#Date fin mission propre
+@register.filter
+def dateFinMissionPropre(id_mission):
+    mission = get_object_or_404(experiences, pk=id_mission)
+    datePasPropre = mission.dateFin
+    if not datePasPropre:
+        pass
+    else:
+        datePropre = datePasPropre.strftime('%d-%m-%Y')
+    return datePropre

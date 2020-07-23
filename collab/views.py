@@ -80,7 +80,6 @@ def index(request):
     def getClientActif():
         client_total=client.objects.all()
         count=0
-        today = datetime.date.today()
         for elt in client_total:
             missions = experiences.objects.filter(client=elt.id)
             if not missions:
@@ -183,13 +182,61 @@ def liste_consultant(request):
     collab_list= collaborateurs.objects.all().order_by('nomCollaborateur')
     context={'collabs':collab_list}
     return HttpResponse(template.render(context, request))
-#Liste consultant recherche
-#def recherche_consultant(request):
-    #chargement du template HTML
-#    template = loader.get_template('collab/liste_consultant_recherche.html')
-#    collab_list = collaborateurs.objects.all()
-#    context={'collabs':collab_list}
-#    return HttpResponse(template.render(context, request))
+
+# Liste consultant ACTifs
+def liste_consultant_actif(request):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.all().order_by('nomCollaborateur')
+    collabs=[]
+    for coll in collab_list:
+        dateDepart=coll.dateSortie
+        if not dateDepart:
+            collabs.append(coll)
+        elif dateDepart > datetime.date.today():
+            collabs.append(coll)
+        else:
+            continue
+    context={'collabs':collabs}
+    return HttpResponse(template.render(context, request))
+
+# Liste consultant ACTifs et en mission
+def liste_consultant_actif_et_en_mission(request):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.all().order_by('nomCollaborateur')
+    collabs=[]
+    collabs_mission=[]
+    for coll in collab_list:
+        dateDepart=coll.dateSortie
+        if not dateDepart:
+            collabs.append(coll)
+        elif dateDepart > datetime.date.today():
+            collabs.append(coll)
+        else:
+            continue
+    for elt in collabs:
+        missionsCollab=experiences.objects.filter(collaborateurMission=elt.pk)
+        if not missionsCollab:
+            continue
+        else:
+            for miss in missionsCollab:
+                dateFinMiss=miss.dateFin
+                if not dateFinMiss:
+                    collabs_mission.append(elt)
+                    break
+                elif dateFinMiss > datetime.date.today():
+                    collabs_mission.append(elt)
+                    break
+                else:
+                    continue
+    context={'collabs':collabs_mission}
+    return HttpResponse(template.render(context, request))
+
+# Liste consultant en interco
+def liste_consultant_interco(request):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.filter(estEnIntercontrat=True).order_by('nomCollaborateur')
+    context={'collabs':collab_list}
+    return HttpResponse(template.render(context, request))
 
 #Detail consultant
 def collaborateur_detail(request, collaborateurs_id):
@@ -641,6 +688,7 @@ def page_cv_word_choix_template(request, collaborateurs_id, template_path):
         data["dateDebut"]=miss.dateDebut
         data["dateDebut_mmmm_aaaa"]=miss.dateDebut.strftime("%B %Y")
         data["dateDebut_mmm-aaaa"]=miss.dateDebut.strftime("%b-%Y")
+        data["dateDebut_aaaa"]=miss.dateDebut.strftime("%Y")
         #calcul durée
         dateFin=miss.dateFin
         if dateFin is None:
@@ -650,6 +698,7 @@ def page_cv_word_choix_template(request, collaborateurs_id, template_path):
             data["dateFin"]="Aujourd'hui"
             data["dateFin_mmmm_aaaa"]="Aujourd'hui"
             data["dateFin_mmm-aaaa"]="Aujourd'hui"
+            data["dateFin_aaaa"]="Aujourd'hui"
         else:
             fin = miss.dateFin
             debut = miss.dateDebut
@@ -657,6 +706,7 @@ def page_cv_word_choix_template(request, collaborateurs_id, template_path):
             data["dateFin"]=miss.dateFin
             data["dateFin_mmmm_aaaa"]=miss.dateFin.strftime("%B %Y")
             data["dateFin_mmm-aaaa"]=miss.dateFin.strftime("%b-%Y")
+            data["dateFin_aaaa"]=miss.dateFin.strftime("%Y")
         data["dureeMission"]=dureeMission
         data["contexteMission"]=generateRichText(doc,miss.resumeIntervention, "DC_Intervention_Contexte")
         data["descriptif"]=generateRichText(doc, miss.descriptifMission, "DC_Intervention_Desc")
@@ -667,7 +717,7 @@ def page_cv_word_choix_template(request, collaborateurs_id, template_path):
     context["nom"]=nom
     context["prenom"]=prenom
     context["titre"]=titre
-    context["grade"]=collab.grade
+    context["grade"]=collab.get_grade_display()
     context["trigramme"]=collab.trigramme
     context["nbAnneeExpe"]=nbAnneeExpe
     context["text_intro"]=texte_introductif

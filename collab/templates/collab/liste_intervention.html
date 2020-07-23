@@ -28,8 +28,8 @@
                                 <td>{{mission.client}} </td>
                                 <td>{{mission.collaborateurMission}}</td>
                                 <td>{% if not mission.projetDeLaMission %}{% else %}{{mission.projetDeLaMission}}{% endif %}</td>
-                                <td>{{mission.dateDebut}} </td>
-                                <td class="hidden-xs hidden-sm">{% if not mission.dateFin %}En cours{% else %}{{mission.dateFin}}{% endif %}</td>
+                                <td>{% with dateDebut=truc|dateDebutMissionPropre %} {{dateDebut}} {% endwith %} </td>
+                                <td class="hidden-xs hidden-sm">{% if not mission.dateFin %}En cours{% else %}{% with DateFin=truc|dateFinMissionPropre %} {{DateFin}} {% endwith %}{% endif %}</td>
                                 <td class="hidden-xs hidden-sm">
                                     <a class="btn btn-primary" role="button" href={{urlModif}}> <i class="glyphicon glyphicon-pencil"></i></a>
                                 </td>

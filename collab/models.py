@@ -256,6 +256,8 @@ class experiences(models.Model):
     employeur = models.CharField('Employeur lors de l’intervention', max_length=300,default='', blank=True, help_text=" Dans le cas où la coche « Mission Thémis » est décochée, merci d’indiquer pour le compte de quelle société avez-vous effectué cette intervention ?")
     mandataire = models.CharField(max_length=300,default='',blank=True, help_text="Si vous êtes passez par un intermédiaire, merci d’indiquer le nom de la société sous-traitante (ex :Eugena)")
     service = models.CharField('Direction ou Service Client', max_length=300,default='',blank=True, help_text='Indiquez la Direction ou le Service du client dans lequel le consultant est intervenu')
+    contactClient1 = models.TextField(default='', blank=True)
+    contactClient2 = models.TextField(default='', blank=True)
     resumeIntervention =  RichTextField('Contexte de l’intervention', default='', blank=True)
     descriptifMission =  RichTextField('Descriptif de la mission', default='', blank=True, help_text='Décrire l’intervention en détail')
     environnementMission =  RichTextField('Environnement Technique', default='', blank=True, null=True)

@@ -12,15 +12,15 @@
                                 <tbody>
                                     <tr>
                                         <td>Consultant(s) enregistrés et Actif(s)</td>
-                                        <td>{{nbConsultant}}</td>
+                                        <td><a href="{% url 'liste_consultant_actif'%}">{{nbConsultant}}</a></td>
                                     </tr>
                                     <tr>
                                         <td>Consultant(s) Actif(s) en mission</td>
-                                        <td>{{nbConsultantEnMission}}</td>
+                                        <td><a href="{% url 'liste_consultant_actif_et_en_mission'%}">{{nbConsultantEnMission}}</a></td>
                                     </tr>
                                     <tr>
                                         <td>Consultant(s) en intercontrat</td>
-                                        <td>{{nbConsultantInterco}}</td>
+                                        <td><a href="{% url 'liste_consultant_interco'%}">{{nbConsultantInterco}}</a></td>
                                     </tr>
                                     <tr>
                                         <td>Taux Intercontrat</td>

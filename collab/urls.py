@@ -5,6 +5,9 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('consultant/', views.liste_consultant, name='liste_consultant'),
+    path('consultant/actif/', views.liste_consultant_actif, name='liste_consultant_actif'),
+    path('consultant/actifetmission/', views.liste_consultant_actif_et_en_mission, name='liste_consultant_actif_et_en_mission'),
+    path('consultant/interco/', views.liste_consultant_interco, name='liste_consultant_interco'),
     path('consultant/compe/<int:competences_id>/', views.liste_consultant_competence, name='liste_consultant_competence'),
     path('consultant/outil/<int:outil_id>/', views.liste_consultant_outil, name='liste_consultant_outil'),
     path('consultant/client/<int:client_id>/', views.liste_consultant_client, name='liste_consultant_client'),
