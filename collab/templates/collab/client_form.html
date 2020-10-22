@@ -14,6 +14,8 @@
         <link rel="stylesheet" href={% static "collab/assets/css/Full-Width-Center-Container.css" %}>
         <link rel="stylesheet" href={% static "collab/assets/css/Simple-Profile-Info.css" %}>
         <link rel="stylesheet" href={% static "collab/assets/css/Google-Style-Login.css" %}>
+        <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+        <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
     </head>
 
 <body>
@@ -52,7 +54,7 @@
                     <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">Intervention <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
                             <li role="presentation"><a href="{% url 'liste_intervention'%}">Liste Intervention</a></li>
-                            <li role="presentation"><a href="#">Ajout Intervention</a></li>
+                            <li role="presentation"><a href="/admin/collab/experiences/add/">Ajout Intervention</a></li>
                         </ul>
                     </li>
                     <li role="presentation"><a href="https://intranet.itsgroup.fr/" target="_blank">Intranet ITS </a></li>
@@ -75,7 +77,8 @@
                 {% block content %}
                 <form method="post">
                     {% csrf_token %}
-                    {{ form|crispy }}
+                    {{ form.media }}
+                    {{ form.as_p }}
                     <button type="submit" class="btn btn-success">Sauvegarder</button>
                 </form>
                 {% endblock %}

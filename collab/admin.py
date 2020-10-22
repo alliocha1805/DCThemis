@@ -23,19 +23,20 @@ class CollabAdmin(admin.ModelAdmin):
     view_on_site = True
 admin.site.register(collaborateurs, CollabAdmin)
 class ExpeAdmin(admin.ModelAdmin):
-    search_fields = ['collaborateurMission__nomCollaborateur','collaborateurMission__prenomCollaborateur','mandataire','service','nomMission','projetDeLaMission__client__nomClient']
-    list_filter = ('collaborateurMission__nomCollaborateur','mandataire','projetDeLaMission__client','missionThemis','projetDeLaMission')
+    search_fields = ['collaborateurMission__nomCollaborateur','collaborateurMission__prenomCollaborateur','mandataire','service','nomMission','client__nomClient']
+    list_filter = ('collaborateurMission__nomCollaborateur','client','mandataire','missionThemis','projetDeLaMission')
     list_display = ('nomMission', 'collaborateurMission', 'projetDeLaMission')
     view_on_site = True
 admin.site.register(experiences, ExpeAdmin)
 class ProjetAdmin(admin.ModelAdmin):
-    search_fields = ['client','nomProjet']
+    search_fields = ['nomProjet']
     list_filter = ('client','nbJourHomme','projetThemis')
     list_display = ('nomProjet','client','nbJourHomme')
 admin.site.register(projet, ProjetAdmin)
 class ClientAdmin(admin.ModelAdmin):
     search_fields = ['nomClient']
     list_filter = ('domaineClient',)
+    list_display = ('nomClient','domaineClient')
 admin.site.register(client,ClientAdmin)
 admin.site.register(BU)
 class gestionManagerialeProjetAdmin(admin.ModelAdmin):
@@ -56,6 +57,9 @@ class FormationAdmin(admin.ModelAdmin):
     list_filter = ('ecole','diplome')
 admin.site.register(formation, FormationAdmin)
 admin.site.register(obtentionFormation)
-admin.site.register(niveauIntervention)
+class NiveauInterventionAdmin(admin.ModelAdmin):
+    search_fields = ['libelle']
+    list_filter = ('libelle',)
+admin.site.register(niveauIntervention, NiveauInterventionAdmin)
 admin.site.register(LanguesParlee)
 admin.site.register(Methodo)

@@ -10,9 +10,8 @@
                 </div>
             </div>
         </div>
-        <h3 class="text-center titre_mission"></h3>
-        <div class="row" data-toggle="collapse" data-target="#consultant">
-            <div class="col-md-11">
+        <div class="row">
+            <div class="col-md-12">
                 {% with id_collab=collab.pk %}
                 {% with nbAnneeExperience=id_collab|calcul_annee_exp %}
                 {% if nbAnneeExperience == '1' %}
@@ -24,11 +23,7 @@
                 {% endwith %}
                 {% endwith %}
             </div>
-            <div class="col-md-1">
-                <a class="btn btn-primary" role="button" href="#"> <i class="glyphicon glyphicon-eye-open"></i></a>
-            </div>
         </div>
-        <div class="row collapse" id="consultant">
         <div class="row">
             <div class="col-lg-3 col-md-3">
                 <div class="panel panel-default">
@@ -163,47 +158,27 @@
                 </div>
             </div>
         </div>
-        </div>
         <div class="row">
-        <h3 class="text-center titre_mission"></h3>
-            <div class="col-md-11">
-                <h1 class="text-center" class="btn btn-info" data-toggle="collapse" data-target=".multi-collapse">Missions</h1>
-            </div>
-            <div class="col-md-1">
-                <a class="btn btn-primary" role="button" data-toggle="collapse" data-target=".multi-collapse"> <i class="glyphicon glyphicon-eye-open"></i></a>
-            </div>
-
+            <div class="col-md-12">
+                <h2 class="text-center">Missions </h2></div>
         </div>
         {% if mission_du_collab %}
         {% for mission in mission_du_collab %}
         {% with "/admin/collab/experiences/"|addstr:mission.pk|addstr:"/change/" as urlModif %}
         {% with idmission=mission.pk %}
-        <h3 class="text-center titre_mission"></h3>
         <div class="row">
-            {% if mission.missionThemis %} 
-            <div class="col-md-1 colonne_xp"> <img src={% static "collab/assets/img/Logo_TC.png" %} height=40 alt="Mission Thémis Conseil"></div>
-            <div class="col-md-10 colonne_xp">
-            {% else %}            
-            <div class="col-md-11 colonne_xp">
-	    {% endif %}            
-                <h3 class="text-center" data-toggle="collapse" data-target="#demo{{mission.pk}}">
-                    {{mission.client}} ( {% with domaine=idmission|recup_client_secteur %}{{domaine}}{% endwith %} ) - {{mission.nomMission}}  - {{mission.dateDebut}} - 
-                    {% if mission.dateFin == None %} En cours 
-                    {% else %} {{mission.dateFin}}
-                    {% endif %}
-                 </h3>
-            </div>
-            <div class="col-md-1">
-                <a class="btn btn-primary bouton_modif_expe" role="button" href={{urlModif}} target="_blank">Modifier </a>
-            </div>
-        </div>
-        <div class="row collapse multi-collapse" id="demo{{mission.pk}}" class="collapse" class="multi-collapse">
             <div class="col-md-12 colonne_xp">
+                {% if mission.dateFin == None %}
+                <h3 class="text-center titre_mission">{{mission.client}} ( {% with domaine=idmission|recup_client_secteur %}{{domaine}}{% endwith %} ) - {{mission.nomMission}}  - {{mission.dateDebut}} - En cours </h3>
+                {% else %}
+                <h3 class="text-center titre_mission">{{mission.client}} ( {% with domaine=idmission|recup_client_secteur %}{{domaine}}{% endwith %} ) - {{mission.nomMission}} - {{mission.dateDebut}} / {{mission.dateFin}} </h3>
+                {% endif %}
                 <p><strong>{{mission.resumeIntervention|safe}} </strong> </p>
                 <p><strong>Descriptif :</strong> {{mission.descriptifMission|safe}} </p>
                 <!--<p><strong>Livrables :</strong> {% with livrable=idmission|livrable_projet %}{{livrable|safe}}{% endwith %}</p>-->
                 <!--<p><strong>Benefice client :</strong> {% with benef=idmission|benef_projet %}{{benef|safe}}{% endwith %}</p>-->
                 <p><strong>Environnement :</strong> {{mission.environnementMission|safe}} </p>
+                <a class="btn btn-primary bouton_modif_expe" role="button" href={{urlModif}} target="_blank">Modifier </a>
             </div>
         </div>
         {% endwith %}
@@ -222,7 +197,7 @@
         </div>
         {% endwith %}
         <div class="row" id="row_bouton_cv">
-            <div class="col-md-12"><a class="btn btn-info btn-lg" role="button" href="{% url 'recup_option_cv' collaborateurs_id=collab.pk %}" id="bouton_generation_cv">GENERER CV</a></div>
+            <div class="col-md-12"><a class="btn btn-info btn-lg" role="button" href="{% url 'page_cv_word' collaborateurs_id=collab.pk %}" id="bouton_generation_cv">GENERER CV</a></div>
         </div>
     </div>
 {% endblock %}

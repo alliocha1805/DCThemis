@@ -3,6 +3,7 @@ from django.forms import ModelForm
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from ckeditor.fields import RichTextField 
+import datetime
 
 #Clients
 class client(models.Model):
@@ -122,6 +123,8 @@ class obtentionFormation(models.Model):
     formation = models.ForeignKey(formation, on_delete=models.SET_NULL, null=True)
     def __str__(self):
         return str('%s %s' %(self.dateObtention, self.formation))
+    def get_year(self):
+        return self.dateObtention.year
 
 #Niveaux d'interventions
 class niveauIntervention(models.Model):
@@ -190,6 +193,7 @@ class collaborateurs(models.Model):
     langues = models.ManyToManyField(LanguesParlee, blank=True, help_text='Obligatoire, indiquez le niveau d’anglais')
     outilsCollaborateur = models.ManyToManyField(outils, blank=True, verbose_name='Outils')
     estEnIntercontrat = models.BooleanField(default=False)
+    updated = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.nomCollaborateur + "-" + self.prenomCollaborateur
     def get_absolute_url(self):
@@ -252,6 +256,8 @@ class experiences(models.Model):
     employeur = models.CharField('Employeur lors de l’intervention', max_length=300,default='', blank=True, help_text=" Dans le cas où la coche « Mission Thémis » est décochée, merci d’indiquer pour le compte de quelle société avez-vous effectué cette intervention ?")
     mandataire = models.CharField(max_length=300,default='',blank=True, help_text="Si vous êtes passez par un intermédiaire, merci d’indiquer le nom de la société sous-traitante (ex :Eugena)")
     service = models.CharField('Direction ou Service Client', max_length=300,default='',blank=True, help_text='Indiquez la Direction ou le Service du client dans lequel le consultant est intervenu')
+    contactClient1 = models.TextField(default='', blank=True)
+    contactClient2 = models.TextField(default='', blank=True)
     resumeIntervention =  RichTextField('Contexte de l’intervention', default='', blank=True)
     descriptifMission =  RichTextField('Descriptif de la mission', default='', blank=True, help_text='Décrire l’intervention en détail')
     environnementMission =  RichTextField('Environnement Technique', default='', blank=True, null=True)

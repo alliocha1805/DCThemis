@@ -1,0 +1,21 @@
+{% extends 'collab/base.html' %}
+{% load crispy_forms_tags %}
+{% load collab_extras %}
+{% load static %}
+{% block content %}    
+<div class="container" id="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center">Choix des options d'export de CV</h1></div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center">Choix template</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-success">Generer CV</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

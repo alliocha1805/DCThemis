@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DC Themis</title>
-    <link rel="stylesheet" href={% static "collab/assets/bootstrap/css/bootstrap.min.css" %}>
+    <link rel="stylesheet" href={% static "assets/bootstrap/css/bootstrap.min.css" %}>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cookie">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,80">
     <link rel="stylesheet" href={% static "collab/assets/css/styles.css" %}>
@@ -21,7 +21,7 @@
 <body>
     <nav class="navbar navbar-default">
         <div class="container-fluid">
-            <div class="navbar-header"><a class="navbar-brand navbar-link" href="{% url 'index'%}">Collab.io</a>
+            <div class="navbar-header"><a class="navbar-brand navbar-link" href="{% url 'index'%}">DCTheque</a>
                 <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
             </div>
             <div class="collapse navbar-collapse" id="navcol-1">
@@ -30,7 +30,7 @@
                     <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">Consultants <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
                             <li role="presentation"><a href="{% url 'liste_consultant'%}">Liste Consultants</a></li>
-                            <li role="presentation"><a href="{% url 'collaborateursCreateView'%}">Ajout d'un consultant</a></li>
+                            <li role="presentation"><a href="/admin/collab/collaborateurs/add/">Ajout d'un consultant</a></li>
                         </ul>
                     </li>
                     <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">Clients <span class="caret"></span></a>
@@ -54,7 +54,7 @@
                     <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">Intervention <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
                             <li role="presentation"><a href="{% url 'liste_intervention'%}">Liste Intervention</a></li>
-                            <li role="presentation"><a href="#">Ajout Intervention</a></li>
+                            <li role="presentation"><a href="/admin/collab/experiences/add/">Ajout Intervention</a></li>
                         </ul>
                     </li>
                     <li role="presentation"><a href="https://intranet.itsgroup.fr/" target="_blank">Intranet ITS </a></li>
@@ -79,6 +79,8 @@
     <script src={% static "collab/assets/js/jquery.min.js" %}></script>
     <script src={% static "collab/assets/bootstrap/js/bootstrap.min.js" %}></script>
     <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+
 </body>
 
 </html>

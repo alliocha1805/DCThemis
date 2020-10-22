@@ -9,18 +9,38 @@ import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 import datetime
+import locale
 from xhtml2pdf import pisa 
 import bs4
 from docxtpl import DocxTemplate, RichText, Listing
 import io
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles.finders import find
+import os
+from django.conf import settings
+from django.contrib.staticfiles.utils import get_files
+from django.contrib.staticfiles.storage import StaticFilesStorage
+from .forms import CvTemplateForm
+#Calcul du nb de consultant actif
+def nbConsultantActif():
+    compteur=0
+    consultants=collaborateurs.objects.all()
+    for elt in consultants:
+        dateDepart=elt.dateSortie
+        if not dateDepart:
+            compteur+=1
+        elif dateDepart > datetime.date.today():
+            compteur+=1
+        else:
+            pass
+    return compteur
 # Homepage
 def index(request):
     template = loader.get_template('collab/index2.html')
-    nbConsultant = collaborateurs.objects.count()
+    nbConsultant = nbConsultantActif()
     nbConsultantInterco = collaborateurs.objects.filter(estEnIntercontrat=True).count()
     nbConsultantEnMission = nbConsultant - nbConsultantInterco
-    txInterco = round((nbConsultantInterco / nbConsultant)*100,2)
+    txInterco = round((nbConsultantInterco / nbConsultantActif())*100,1)
     nbCompe = competences.objects.count()
     nbOutils = outils.objects.count()
     nbClient = client.objects.count()
@@ -45,24 +65,37 @@ def index(request):
                     else:
                         statut = "PAS ACTIF"
         return statut
+    def VerifMissionEnCours(idMission):
+        missionaTest=get_object_or_404(experiences, pk=idMission)
+        today = datetime.date.today()
+        dateFinMission = missionaTest.dateFin
+        if not dateFinMission:
+            statut = "ACTIF"
+        elif dateFinMission < today:
+            statut = "ACTIF"
+        else:
+            statut = "INACTIF"
+        return statut
     #calcul du nombre de client actif (a savoir les clients avec une mission en cours a date) A REWORK car expe n'ont plus de client
     def getClientActif():
         client_total=client.objects.all()
         count=0
         for elt in client_total:
-            projets = projet.objects.filter(client=elt.id)
-            for elt in projets:
-                idProjet = elt.pk
-                statut= verifProjetActif(idProjet)
-                if statut == "ACTIF":
-                    count+=1
-                    break
-                else:
-                    continue
+            missions = experiences.objects.filter(client=elt.id)
+            if not missions:
+                pass
+            else:
+                for miss in missions:
+                    statut = VerifMissionEnCours(miss.pk)
+                    if statut == "ACTIF":
+                        count+=1
+                        break
+                    else:
+                        continue
         return(count)
     nbClientActif = getClientActif()
     nbClientInactif = nbClient - nbClientActif
-    txClientInactif = round((nbClientInactif / nbClient)*100,2)
+    txClientInactif = round((nbClientInactif / nbClient)*100,1)
     #calcul du nombre de competence moyen par consultant
     def getMoyenneCompetence():
         listeCompe=[]
@@ -80,8 +113,8 @@ def index(request):
             listeOutil.append(nb_outil_calcul)
         moyenne=(sum(listeOutil)/len(listeOutil))
         return(moyenne)
-    moyenneOutil = getMoyenneOutil()
-    moyenneCompetence = getMoyenneCompetence()
+    moyenneOutil = round(getMoyenneOutil(),1)
+    moyenneCompetence = round(getMoyenneCompetence(),1)
     #calcul top 5 des outils - la fonction retourne l'outil en position N du top
     def getTop5Outils():
         listeCollab=collaborateurs.objects.all()
@@ -149,13 +182,61 @@ def liste_consultant(request):
     collab_list= collaborateurs.objects.all().order_by('nomCollaborateur')
     context={'collabs':collab_list}
     return HttpResponse(template.render(context, request))
-#Liste consultant recherche
-#def recherche_consultant(request):
-    #chargement du template HTML
-#    template = loader.get_template('collab/liste_consultant_recherche.html')
-#    collab_list = collaborateurs.objects.all()
-#    context={'collabs':collab_list}
-#    return HttpResponse(template.render(context, request))
+
+# Liste consultant ACTifs
+def liste_consultant_actif(request):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.all().order_by('nomCollaborateur')
+    collabs=[]
+    for coll in collab_list:
+        dateDepart=coll.dateSortie
+        if not dateDepart:
+            collabs.append(coll)
+        elif dateDepart > datetime.date.today():
+            collabs.append(coll)
+        else:
+            continue
+    context={'collabs':collabs}
+    return HttpResponse(template.render(context, request))
+
+# Liste consultant ACTifs et en mission
+def liste_consultant_actif_et_en_mission(request):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.all().order_by('nomCollaborateur')
+    collabs=[]
+    collabs_mission=[]
+    for coll in collab_list:
+        dateDepart=coll.dateSortie
+        if not dateDepart:
+            collabs.append(coll)
+        elif dateDepart > datetime.date.today():
+            collabs.append(coll)
+        else:
+            continue
+    for elt in collabs:
+        missionsCollab=experiences.objects.filter(collaborateurMission=elt.pk)
+        if not missionsCollab:
+            continue
+        else:
+            for miss in missionsCollab:
+                dateFinMiss=miss.dateFin
+                if not dateFinMiss:
+                    collabs_mission.append(elt)
+                    break
+                elif dateFinMiss > datetime.date.today():
+                    collabs_mission.append(elt)
+                    break
+                else:
+                    continue
+    context={'collabs':collabs_mission}
+    return HttpResponse(template.render(context, request))
+
+# Liste consultant en interco
+def liste_consultant_interco(request):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.filter(estEnIntercontrat=True).order_by('nomCollaborateur')
+    context={'collabs':collab_list}
+    return HttpResponse(template.render(context, request))
 
 #Detail consultant
 def collaborateur_detail(request, collaborateurs_id):
@@ -167,13 +248,19 @@ def collaborateur_detail(request, collaborateurs_id):
     expeSingificatives.append(collab.expSignificative3)
     expeSingificatives.append(collab.expSignificative4)
     expeSingificatives.append(collab.expSignificative5)
+    formations=[]
+    for form in collab.formation.all().order_by('formation__obtentionformation__dateObtention'):
+        annee=form.get_year()
+        diplome=form.formation.diplome
+        ecole=form.formation.ecole
+        formations.append(str(annee)+" - "+diplome+" - "+ecole)
     template = loader.get_template('collab/detail_consultant2.html')
-    context={'collab':collab, 'mission_du_collab':mission_du_collab,'expeSingificatives':expeSingificatives}
+    context={'collab':collab, 'mission_du_collab':mission_du_collab,'expeSingificatives':expeSingificatives,'formations':formations}
     return HttpResponse(template.render(context, request))
 #Ajout d'un consultant
 class collaborateursCreateView(CreateView):
     model = collaborateurs
-    fields = ('nomCollaborateur', 'prenomCollaborateur','titreCollaborateur','texteIntroductifCv','listeCompetencesCles','formation','parcours','methodologie','langues','outilsCollaborateur','estEnIntercontrat')
+    fields = ('nomCollaborateur', 'prenomCollaborateur','trigramme','titreCollaborateur','dateDeNaissance','texteIntroductifCv','dateDebutExpPro','codePostal','telephone','listeCompetencesCles','formation','parcours','methodologie','langues','outilsCollaborateur','estEnIntercontrat')
     success_url = 'succes/'
 def reussite_ajout_collaborateurs(request):
     template = loader.get_template('collab/reussite_ajout_collaborateurs2.html')
@@ -186,6 +273,51 @@ def liste_client(request):
     client_list= client.objects.all().order_by('nomClient')
     context={'clients':client_list}
     return HttpResponse(template.render(context, request))
+#Fonction de verification de mission en cours
+def VerifMissionEnCours(idMission):
+    missionaTest=get_object_or_404(experiences, pk=idMission)
+    today = datetime.date.today()
+    dateFinMission = missionaTest.dateFin
+    if not dateFinMission:
+        statut = "ACTIF"
+    elif dateFinMission < today:
+        statut = "ACTIF"
+    else:
+        statut = "INACTIF"
+    return statut
+#Liste client actif
+def liste_client_actif(request):
+    template = loader.get_template('collab/liste_client2.html')
+    client_list= client.objects.all()
+    clients=[]
+    for elt in client_list:
+        missionsDuClient = experiences.objects.filter(client=elt.id)
+        for mission in missionsDuClient:
+            statut = VerifMissionEnCours(mission.pk)
+            if statut == "ACTIF":
+                clients.append(elt)
+                break
+            else:
+                continue
+    context={'clients':clients}
+    return HttpResponse(template.render(context, request))
+#Liste client inactif
+def liste_client_inactif(request):
+    template = loader.get_template('collab/liste_client2.html')
+    client_list= client.objects.all()
+    clients_actif=[]
+    for elt in client_list:
+        missionsDuClient = experiences.objects.filter(client=elt.id)
+        for mission in missionsDuClient:
+            statut = VerifMissionEnCours(mission.pk)
+            if statut == "ACTIF":
+                clients_actif.append(elt)
+                break
+            else:
+                continue
+    clients = list(set(client_list) - set(clients_actif))
+    context={'clients':clients}
+    return HttpResponse(template.render(context, request))
 #Ajout d'un client
 class clientCreateView(LoginRequiredMixin, CreateView):
     login_url = '/accounts/login/'
@@ -196,7 +328,20 @@ class clientCreateView(LoginRequiredMixin, CreateView):
 def reussite_ajout_client(request):
     template = loader.get_template('collab/reussite_ajout_client2.html')
     context={}
-    return HttpResponse(template.render(context, request))    
+    return HttpResponse(template.render(context, request))  
+
+# Liste consultant Par Client
+def liste_consultant_client(request,client_id):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    expe_list= experiences.objects.filter(client=client_id)
+    collab_list=[]
+    for elt in expe_list:
+        collab_id=elt.collaborateurMission.pk
+        collab=get_object_or_404(collaborateurs, pk=collab_id)
+        collab_list.append(collab)
+    context={'collabs':collab_list}
+    return HttpResponse(template.render(context, request))
+
 #Liste compétences PAGINEE EN FRONT
 def liste_competence(request):
     template = loader.get_template('collab/liste_competence2.html')
@@ -214,6 +359,12 @@ class competencesCreateView(LoginRequiredMixin, CreateView):
 def reussite_ajout_competence(request):
     template = loader.get_template('collab/reussite_ajout_compe2.html')
     context={}
+    return HttpResponse(template.render(context, request))
+# Liste consultant Par compétence
+def liste_consultant_competence(request,competences_id):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.filter(listeCompetencesCles=competences_id)
+    context={'collabs':collab_list}
     return HttpResponse(template.render(context, request))
 
 #Liste outil REELLEMENT PAGINEE
@@ -247,7 +398,12 @@ def reussite_ajout_outil(request):
     template = loader.get_template('collab/reussite_ajout_outil2.html')
     context={}
     return HttpResponse(template.render(context, request))
-
+# Liste consultant Par Outil
+def liste_consultant_outil(request,outil_id):
+    template = loader.get_template('collab/liste_consultant_recherche.html')
+    collab_list= collaborateurs.objects.filter(outilsCollaborateur=outil_id)
+    context={'collabs':collab_list}
+    return HttpResponse(template.render(context, request))
 
 #Page CV
 def page_cv_html(request, collaborateurs_id):
@@ -335,6 +491,7 @@ def generateRichText (doc, html_text, dc_style):
     IsHtmlElement = bool(bs4.BeautifulSoup(html_text, "html.parser").find())
     if bool(bs4.BeautifulSoup(html_text, "html.parser").find()):
         html_text = html_text.replace('\n','')
+        html_text = html_text.replace('\r','')
         html_text = html_text.replace('\t','')
         soup_text = bs4.BeautifulSoup(html_text, "html.parser")
         for soup_element in soup_text.contents:
@@ -392,10 +549,10 @@ def generateRichText2(doc, raw_html, DC_STYLE):
                                                 
     return(rt)
 #Page CV docx
-def page_cv_word(request, collaborateurs_id):
+def page_cv_word_choix_template(request, collaborateurs_id, template_path):
     collab = get_object_or_404(collaborateurs, pk=collaborateurs_id)
     mission_du_collab = experiences.objects.filter(collaborateurMission=collaborateurs_id).order_by('-dateDebut')
-    fichier_template = staticfiles_storage.path('collab/Thémis-conseil-DC_TEMPLATE.docx')
+    fichier_template = staticfiles_storage.path(template_path)
     doc = DocxTemplate(fichier_template)
     today = datetime.date.today()
     context = {}
@@ -404,7 +561,7 @@ def page_cv_word(request, collaborateurs_id):
     nom_sortie = nom + "-"+prenom+"-"+str(today)+".docx"
     titre = collab.titreCollaborateur
     #calcul nb année expe
-    if isinstance(collab.dateDebutExpPro,datetime.datetime):
+    if isinstance(collab.dateDebutExpPro,datetime.date):
         dateExpeDebutAnne = collab.dateDebutExpPro.year
     else:
         dateExpeDebutAnne = datetime.date.today().year	
@@ -432,7 +589,7 @@ def page_cv_word(request, collaborateurs_id):
     secteurs=[]
     for secteur in SecteurConsult:
         secteurs.append(secteur.nom)
-    #recup des outils
+    #recup des outils ANCIENNE FONCTION
     OutilsConsult = collab.outilsCollaborateur.all()
     outils=[]
     #on groupe les résultat dans un dictionnaire {famille:[outil1,outil2],famille2:[outil1,outil2]}
@@ -450,10 +607,24 @@ def page_cv_word(request, collaborateurs_id):
             groupementOutil[famille]=nom
     for key in groupementOutil:
         outils.append(str(key)+" : "+groupementOutil.get(key))
-    #Ancienne fonction basique je garde pour le moment
-    #for outil in OutilsConsult:
-    #    outils.append(outil.nomOutil)
-    
+    #Nouvelle fonction Outil par Olivier le 21/07/2020
+    groupementOutil2={}
+    for outil in OutilsConsult:
+        famille=outil.famille
+        nom=outil.nomOutil
+        #on verifie si la famille outil est deja dans le dictionnaire
+        if famille not in groupementOutil2:
+            groupementOutil2[famille]=[]
+        groupementOutil2[famille].append(nom)
+    outils2=[]
+    for famillesO in groupementOutil2:
+        data={}
+        data["famille"]=famillesO
+        data["outils"]=[]
+        for outilO in groupementOutil2[famillesO]:
+            data["outils"].append(outilO)
+        outils2.append(data)
+    context["outils2"]=outils2
     #recup des langues
     LanguesConsult = collab.langues.all()
     langues=[]
@@ -464,13 +635,50 @@ def page_cv_word(request, collaborateurs_id):
     methodologies=[]
     for methodo in MethodoConsult:
         methodologies.append(methodo.nom)
-    #recup des formations
-    FormationConsult = collab.formation.all()
+    #recup des formations simple
+    FormationConsult = collab.formation.all().order_by('formation__obtentionformation__dateObtention')
     formations=[]
     for forma in FormationConsult:
-        formations.append(forma.formation)
+        annee=forma.get_year()
+        diplome=forma.formation.diplome
+        ecole=forma.formation.ecole
+        formations.append(str(annee)+" : "+diplome+" - "+ecole)
+    #Formation en double boucle
+    formations2=[]
+    for forma in FormationConsult:
+        data={}
+        data["annee"]=forma.get_year()
+        data["diplome"]=forma.formation.diplome
+        data["ecole"]=forma.formation.ecole
+        data["formation"]=(str(data["annee"])+" : "+data["diplome"]+" - "+data["ecole"])
+        formations2.append(data)
+    context["formations2"]=sorted(formations2, key=lambda col: col["annee"])
+    context["formations2_desc"]=sorted(formations2, key=lambda col: col["annee"], reverse=True)
+    #recup des expe significatives
+    expeSignificatives=[]
+    if collab.expSignificative1:
+        expeSignificatives.append(collab.expSignificative1)
+    else:
+        pass
+    if collab.expSignificative2:
+        expeSignificatives.append(collab.expSignificative2)
+    else:
+        pass
+    if collab.expSignificative3:
+        expeSignificatives.append(collab.expSignificative3)
+    else:
+        pass
+    if collab.expSignificative4:
+        expeSignificatives.append(collab.expSignificative4)
+    else:
+        pass
+    if collab.expSignificative5:
+        expeSignificatives.append(collab.expSignificative5)
+    else:
+        pass
     #recup des missions (il faut tout recup car impossible d'utiliser les templatetags avec du Word)
     missions=[]
+    locale.setlocale(locale.LC_ALL, 'fr_FR')
     for miss in mission_du_collab:
         data={}
         data["nomMission"]=miss.nomMission
@@ -478,16 +686,27 @@ def page_cv_word(request, collaborateurs_id):
         data["Domaine"]=miss.client.domaineClient
         data["Service"]=miss.service
         data["dateDebut"]=miss.dateDebut
+        data["dateDebut_mmmm_aaaa"]=miss.dateDebut.strftime("%B %Y")
+        data["dateDebut_mmm-aaaa"]=miss.dateDebut.strftime("%b-%Y")
+        data["dateDebut_aaaa"]=miss.dateDebut.strftime("%Y")
         #calcul durée
         dateFin=miss.dateFin
         if dateFin is None:
             fin = datetime.date.today()
             debut = miss.dateDebut
-            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month)
+            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month)+ 1
+            data["dateFin"]="Aujourd'hui"
+            data["dateFin_mmmm_aaaa"]="Aujourd'hui"
+            data["dateFin_mmm-aaaa"]="Aujourd'hui"
+            data["dateFin_aaaa"]="Aujourd'hui"
         else:
             fin = miss.dateFin
             debut = miss.dateDebut
-            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month)            
+            dureeMission = (fin.year - debut.year) * 12 + (fin.month - debut.month) + 1
+            data["dateFin"]=miss.dateFin
+            data["dateFin_mmmm_aaaa"]=miss.dateFin.strftime("%B %Y")
+            data["dateFin_mmm-aaaa"]=miss.dateFin.strftime("%b-%Y")
+            data["dateFin_aaaa"]=miss.dateFin.strftime("%Y")
         data["dureeMission"]=dureeMission
         data["contexteMission"]=generateRichText(doc,miss.resumeIntervention, "DC_Intervention_Contexte")
         data["descriptif"]=generateRichText(doc, miss.descriptifMission, "DC_Intervention_Desc")
@@ -498,14 +717,11 @@ def page_cv_word(request, collaborateurs_id):
     context["nom"]=nom
     context["prenom"]=prenom
     context["titre"]=titre
+    context["grade"]=collab.get_grade_display()
     context["trigramme"]=collab.trigramme
     context["nbAnneeExpe"]=nbAnneeExpe
     context["text_intro"]=texte_introductif
-    context["expeSigni1"]=collab.expSignificative1
-    context["expeSigni2"]=collab.expSignificative2
-    context["expeSigni3"]=collab.expSignificative3
-    context["expeSigni4"]=collab.expSignificative4
-    context["expeSigni5"]=collab.expSignificative5
+    context["expeSignificatives"]=expeSignificatives
     context["competences"]=competences
     context["Interventions"]=interventions
     context["clients"]=clients
@@ -525,6 +741,21 @@ def page_cv_word(request, collaborateurs_id):
     response["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     return response
 
+
+#Vue form choix template CV
+def recup_option_cv(request, collaborateurs_id):
+    if request.method == 'POST':
+        form = CvTemplateForm(request.POST)
+        if form.is_valid():
+           template = form.cleaned_data['template']
+           template_path='collab\\'+template
+           return page_cv_word_choix_template(request, collaborateurs_id,template_path)
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = CvTemplateForm()
+        form.initial['collabid'] = collaborateurs_id
+
+    return render(request, 'collab/choix_option_cv.html', {'form': form})
 #Page liste intervention
 def liste_intervention(request):
     template = loader.get_template('collab/liste_intervention.html')

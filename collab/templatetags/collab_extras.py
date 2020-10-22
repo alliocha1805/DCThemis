@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 import datetime
 register = template.Library()
 
-#Definir statut consultant
+#Definir statut intercontrat consultant
 @register.filter(name='statut_consultant')
 def statut_consultant(id_collab):
     test = collaborateurs.objects.filter(pk=id_collab).values("estEnIntercontrat")
@@ -13,6 +13,35 @@ def statut_consultant(id_collab):
         return "Oui"
     else:
         return "Non"
+
+#Recup Statut Themis d'un consultant
+@register.filter(name='statut_contrat')
+def statut_contrat(id_collab):
+    statut = get_object_or_404(collaborateurs, pk=id_collab).get_typeContrat_display()
+    return statut
+
+#Recup Statut Actif ou non (viré / demission) d'un consultant
+@register.filter(name='actif_consultant')
+def actif_consultant(id_collab):
+    date_depart = get_object_or_404(collaborateurs, pk=id_collab).dateSortie
+    if not date_depart:
+        actif="ACTIF"
+    elif date_depart > datetime.date.today():
+        actif="ACTIF"
+    else:
+        actif="NON" 
+    return actif
+
+#Recup manager propre d'un consultant
+@register.filter(name='manager_consultant_propre')
+def manager_consultant_propre(id_collab):
+    collab = get_object_or_404(collaborateurs, pk=id_collab)
+    try:
+        managers = collab.manager.all().order_by("-dateDebut")
+        manager = managers[0].manager
+    except:
+        manager = "Pas de Manager Enregistré"
+    return manager
 
 #recup contexte projet d'une mission ON GARDE ON SAIT JAMAIS
 #@register.filter(name='contexte_projet')
@@ -108,7 +137,7 @@ def recup_mission_en_cours(id_client):
 def statut_client(id_client):
     missions = experiences.objects.filter(client=id_client)
     if not missions:
-        statut = "Inactif"
+        statut = "NON"
     else:
         for mission in missions:
             date_fin=mission.dateFin
@@ -119,7 +148,7 @@ def statut_client(id_client):
                 statut = "Actif"
                 break
             else:
-                statut = "Inactif"
+                statut = "NON"
     return statut       
 
 #Ajouter deux string
@@ -131,8 +160,38 @@ def addstr(arg1, arg2):
 @register.filter(name='calcul_annee_exp')
 def calcul_annee_exp(id_collab):
     collab = get_object_or_404(collaborateurs, pk=id_collab)
-    dateExpeDebutAnne = collab.dateDebutExpPro.year
-    anneeActuelle = datetime.date.today().year
-    differenceExpe = anneeActuelle - dateExpeDebutAnne
-    nbAnneeExpe = differenceExpe
+    try:
+        dateExpeDebutAnne = collab.dateDebutExpPro.year
+        anneeActuelle = datetime.date.today().year
+        differenceExpe = anneeActuelle - dateExpeDebutAnne
+        nbAnneeExpe = differenceExpe
+    except:
+        nbAnneeExpe="DEFINIR DATE DEBUT EXPE PRO"
     return nbAnneeExpe
+
+#Date dernière modif collab sous forme JJ/MM/AAAA
+@register.filter
+def dateModifPropre(id_collab):
+    collab = get_object_or_404(collaborateurs, pk=id_collab)
+    datePasPropre = collab.updated
+    datePropre = datePasPropre.strftime('%d-%m-%Y')
+    return datePropre
+
+#Date debut mission propre
+@register.filter
+def dateDebutMissionPropre(id_mission):
+    mission = get_object_or_404(experiences, pk=id_mission)
+    datePasPropre = mission.dateDebut
+    datePropre = datePasPropre.strftime('%d-%m-%Y')
+    return datePropre
+
+#Date fin mission propre
+@register.filter
+def dateFinMissionPropre(id_mission):
+    mission = get_object_or_404(experiences, pk=id_mission)
+    datePasPropre = mission.dateFin
+    if not datePasPropre:
+        pass
+    else:
+        datePropre = datePasPropre.strftime('%d-%m-%Y')
+    return datePropre
