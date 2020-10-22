@@ -195,3 +195,17 @@ def dateFinMissionPropre(id_mission):
     else:
         datePropre = datePasPropre.strftime('%d-%m-%Y')
     return datePropre
+
+#Verification du groupe de l'utilisateur
+@register.filter(name='groupe_utilisateur') 
+def groupe_utilisateur(user, group_name):
+    return user.groups.filter(name=group_name).exists()
+
+#Statut mission Themis propre pour Front
+@register.filter
+def statutThemisMission(id_mission):
+    mission = get_object_or_404(experiences, pk=id_mission)
+    if mission.missionThemis == True:
+        return "OUI"
+    else:
+        return "NON"

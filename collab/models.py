@@ -256,8 +256,8 @@ class experiences(models.Model):
     employeur = models.CharField('Employeur lors de l’intervention', max_length=300,default='', blank=True, help_text=" Dans le cas où la coche « Mission Thémis » est décochée, merci d’indiquer pour le compte de quelle société avez-vous effectué cette intervention ?")
     mandataire = models.CharField(max_length=300,default='',blank=True, help_text="Si vous êtes passez par un intermédiaire, merci d’indiquer le nom de la société sous-traitante (ex :Eugena)")
     service = models.CharField('Direction ou Service Client', max_length=300,default='',blank=True, help_text='Indiquez la Direction ou le Service du client dans lequel le consultant est intervenu')
-    contactClient1 = models.TextField(default='', blank=True)
-    contactClient2 = models.TextField(default='', blank=True)
+    contactClient1 = models.TextField('Contact Client 1',default='', blank=True, help_text='Indiquez le nom, prénom, rôle, numéro de téléphone et le mail de votre contact durant la mission')
+    contactClient2 = models.TextField('Contact Client 2',default='', blank=True, help_text='Indiquez le nom, prénom, rôle, numéro de téléphone et le mail de votre contact durant la mission')
     resumeIntervention =  RichTextField('Contexte de l’intervention', default='', blank=True)
     descriptifMission =  RichTextField('Descriptif de la mission', default='', blank=True, help_text='Décrire l’intervention en détail')
     environnementMission =  RichTextField('Environnement Technique', default='', blank=True, null=True)
@@ -271,3 +271,29 @@ class experiences(models.Model):
         return "/consultant/%i/" % collab
     class Meta: 
         verbose_name = 'Intervention'
+
+#Experiences a valider
+class experiencesAValider(models.Model):
+    missionThemis = models.BooleanField('Mission Thémis', default=True, help_text="Décochez la coche, s’il s’agit d’une mission pour le compte d’une autre société")
+    nomMission = models.CharField('Niveau d’intervention', max_length=300, help_text="Indiquez le poste occupé par le consultant lors de l’intervention ex : (Consultant BI)")
+    dateDebut = models.DateField('date de début de mission')
+    dateFin = models.DateField('date de fin de mission', blank=True, null=True)
+    client = models.ForeignKey(client, on_delete=models.CASCADE, null=True)
+    employeur = models.CharField('Employeur lors de l’intervention', max_length=300,default='', blank=True, help_text=" Dans le cas où la coche « Mission Thémis » est décochée, merci d’indiquer pour le compte de quelle société avez-vous effectué cette intervention ?")
+    mandataire = models.CharField(max_length=300,default='',blank=True, help_text="Si vous êtes passez par un intermédiaire, merci d’indiquer le nom de la société sous-traitante (ex :Eugena)")
+    service = models.CharField('Direction ou Service Client', max_length=300,default='',blank=True, help_text='Indiquez la Direction ou le Service du client dans lequel le consultant est intervenu')
+    contactClient1 = models.TextField('Contact Client 1',default='', blank=True, help_text='Indiquez le nom, prénom, rôle, numéro de téléphone et le mail de votre contact durant la mission')
+    contactClient2 = models.TextField('Contact Client 2',default='', blank=True, help_text='Indiquez le nom, prénom, rôle, numéro de téléphone et le mail de votre contact durant la mission')
+    resumeIntervention =  RichTextField('Contexte de l’intervention', default='', blank=True)
+    descriptifMission =  RichTextField('Descriptif de la mission', default='', blank=True, help_text='Décrire l’intervention en détail')
+    environnementMission =  RichTextField('Environnement Technique', default='', blank=True, null=True)
+    pourcentageIntervention = models.IntegerField('Pourcentage du temps passé en intervention', default=100, validators=[MaxValueValidator(100),MinValueValidator(1)],blank=True)
+    collaborateurMission = models.ForeignKey(collaborateurs, on_delete=models.CASCADE, default='', verbose_name='Collaborateur', help_text='Utilisez la liste pour rattacher le collaborateur à la mission')
+    projetDeLaMission = models.ForeignKey(projet, on_delete=models.SET_NULL, default='', null=True, verbose_name='Projet de la mission', blank=True)
+    def __str__(self):
+        return self.nomMission
+    def get_absolute_url(self):
+        collab=self.collaborateurMission.id
+        return "/consultant/%i/" % collab
+    class Meta: 
+        verbose_name = 'Intervention a valider par Manager'

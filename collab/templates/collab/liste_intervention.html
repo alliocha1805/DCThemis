@@ -12,6 +12,7 @@
                             <tr class="text-center">
                                 <th class="text-center" data-sortable="true" data-filter-control="input" data-field="Nom mission">Nom mission </th>
                                 <th class="text-center" data-sortable="true" data-filter-control="input" data-field="Client">Client </th>
+                                <th class="text-center" data-sortable="true" data-filter-control="input" data-field="Mission Themis">Mission Themis </th>
                                 <th class="text-center" data-sortable="true" data-filter-control="select"data-field="Collaborateur">Collaborateur </th>
                                 <th class="text-center" data-sortable="true" data-filter-control="input" data-field="Projet">Projet </th>
                                 <th class="text-center" data-sortable="true">Date Début </th>
@@ -26,6 +27,7 @@
                             <tr>
                                 <td>{{mission.nomMission}} </td>
                                 <td>{{mission.client}} </td>
+                                <td>{% with statutThemis=truc|statutThemisMission %} {{statutThemis}} {% endwith %}</td>
                                 <td>{{mission.collaborateurMission}}</td>
                                 <td>{% if not mission.projetDeLaMission %}{% else %}{{mission.projetDeLaMission}}{% endif %}</td>
                                 <td>{% with dateDebut=truc|dateDebutMissionPropre %} {{dateDebut}} {% endwith %} </td>

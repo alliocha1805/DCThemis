@@ -1,5 +1,6 @@
 {% load static %}
 {% load crispy_forms_tags %}
+{% load collab_extras %}
 <!DOCTYPE html>
 <html>
 
@@ -69,6 +70,9 @@
         </div>
     </nav>
     {% if user.is_authenticated %}
+    {% if user|groupe_utilisateur:"Consultants" %}
+    <p style="text-align:center;"> Vous n'avez pas accès à cet page</p>
+    {% else %}
     <div class="page-header">
         <h1 class="text-center">Ajout Client</h1></div>
     <div class="container" id="container">
@@ -85,6 +89,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     {% else %}
     <p style="text-align:center;"> <b>Veuillez vous <a href="/accounts/login">identifier</a></b></p>
     {% endif %}

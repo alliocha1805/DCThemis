@@ -1,5 +1,6 @@
 {% load static %}
 {% load admin_urls %}
+{% load collab_extras %}
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -54,7 +55,11 @@
                     <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">Intervention <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
                             <li role="presentation"><a href="{% url 'liste_intervention'%}">Liste Intervention</a></li>
+                            {% if user|groupe_utilisateur:"Consultants" %}
+                            <li role="presentation"><a href="/admin/collab/experiencesavalider/">Ajout Intervention à faire valider par Manager</a></li> 
+                            {% else %}
                             <li role="presentation"><a href="/admin/collab/experiences/add/">Ajout Intervention</a></li>
+                            {% endif %}
                         </ul>
                     </li>
                     <li role="presentation"><a href="https://intranet.itsgroup.fr/" target="_blank">Intranet ITS </a></li>

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import competences, familleCompetences, outils, familleOutils, collaborateurs, experiences, client, projet, BU, gestionManagerialeProjet, gestionCommercialeProjet, gestionManagerialeConsultant, expertiseSectorielle, formation, obtentionFormation, niveauIntervention, LanguesParlee, Methodo
+from .models import competences, familleCompetences, outils, familleOutils, collaborateurs, experiences, client, projet, BU, gestionManagerialeProjet, gestionCommercialeProjet, gestionManagerialeConsultant, expertiseSectorielle, formation, obtentionFormation, niveauIntervention, LanguesParlee, Methodo, experiencesAValider
 
 class CompetenceAdmin(admin.ModelAdmin):
     search_fields = ['nomCompetence']
@@ -63,3 +63,4 @@ class NiveauInterventionAdmin(admin.ModelAdmin):
 admin.site.register(niveauIntervention, NiveauInterventionAdmin)
 admin.site.register(LanguesParlee)
 admin.site.register(Methodo)
+admin.site.register(experiencesAValider)
